@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nihonto 3D - Samurai Sword Museum & Dojo Interactive Experience</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <!-- 3D Canvas WebGL Host -->
+    <div id="canvas-container"></div>
+
+    <!-- 3D Anatomical Markers Overlay for Exploded/Kaitai View -->
+    <div id="annotations-container"></div>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer">
+        <!-- Top Navigation Bar -->
+        <header class="header interactive">
+            <div class="brand-section">
+                <div class="hanko-seal">刀</div>
+                <div class="title-group">
+                    <h1>NIHONTO <span>MUSEUM</span></h1>
+                    <div class="subtitle">侍の刀剣・日本刀 3D GALLERY & DOJO</div>
+                </div>
+            </div>
+
+            <div class="nav-controls">
+                <div class="mode-switch">
+                    <button class="mode-tab active" data-mode="museum">
+                        <span>🏛️</span> Museum Gallery
+                    </button>
+                    <button class="mode-tab" data-mode="dojo">
+                        <span>⚔️</span> Tameshigiri Dojo
+                    </button>
+                </div>
+
+                <button id="btn-audio" class="icon-btn" title="Toggle Procedural Japanese Audio Soundscape">
+                    🔊 Soundscape On
+                </button>
+            </div>
+        </header>
+
+        <!-- Top Blade Selector Strip -->
+        <div class="blade-bar-container interactive">
+            <div class="blade-bar glass-panel">
+                <button class="blade-btn active" data-blade="katana">
+                    <span class="kanji">刀</span>
+                    <span>Katana</span>
+                </button>
+                <button class="blade-btn" data-blade="wakizashi">
+                    <span class="kanji">脇差</span>
+                    <span>Wakizashi</span>
+                </button>
+                <button class="blade-btn" data-blade="tanto">
+                    <span class="kanji">短刀</span>
+                    <span>Tanto</span>
+                </button>
+                <button class="blade-btn" data-blade="nodachi">
+                    <span class="kanji">野太刀</span>
+                    <span>Nodachi</span>
+                </button>
+                <button class="blade-btn" data-blade="shirasaya">
+                    <span class="kanji">白鞘</span>
+                    <span>Shirasaya</span>
+                </button>
+                <button class="blade-btn" data-blade="naginata">
+                    <span class="kanji">薙刀</span>
+                    <span>Naginata</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Museum Mode Interactive Overlay -->
+        <div id="museum-ui" class="content-area">
+            <!-- Left Blade Specification Card -->
+            <div class="spec-card glass-panel interactive">
+                <div class="spec-header">
+                    <div class="spec-title" id="blade-title">Katana (刀)</div>
+                    <div class="spec-tag" id="blade-era">Edo Period (Daisho Pair)</div>
+                </div>
+
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <div class="spec-label">Master Smith</div>
+                        <div class="spec-value" id="blade-smith">Gassan Sadatoshi</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Nagasa (Length)</div>
+                        <div class="spec-value" id="blade-length">73 cm (2.4 Shaku)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Sori (Curvature)</div>
+                        <div class="spec-value" id="blade-sori">1.8 cm Torii-Sori</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Steel Composition</div>
+                        <div class="spec-value">Folded Tamahagane</div>
+                    </div>
+                </div>
+
+                <div class="spec-desc" id="blade-desc">
+                    The soul of the samurai warrior. Balanced for two-handed strikes and lightning-fast quick-draw cuts (Iaijutsu).
+                </div>
+
+                <!-- Hamon Temper Line Selector -->
+                <div class="hamon-section">
+                    <div class="hamon-label">
+                        <span>Hamon Line (刃文)</span>
+                        <span style="font-size: 10px; color: #a0a6b5;">Differential Hardening</span>
+                    </div>
+                    <div class="hamon-buttons">
+                        <button class="hamon-btn active" data-hamon="notare">Notare (Wave)</button>
+                        <button class="hamon-btn" data-hamon="suguha">Suguha (Straight)</button>
+                        <button class="hamon-btn" data-hamon="midare">Midare (Wild)</button>
+                        <button class="hamon-btn" data-hamon="gunome">Gunome (Clove)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Center Action Dock -->
+            <div class="bottom-dock interactive">
+                <!-- Sheath Slider -->
+                <div class="dock-slider-box glass-panel">
+                    <span class="dock-slider-label">Sheath (鞘)</span>
+                    <input type="range" id="draw-slider" class="range-slider" min="0" max="1" step="0.005" value="0" title="Slide to draw sword from saya">
+                    <span class="dock-slider-label">Drawn (抜刀)</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="dock-buttons">
+                    <button id="btn-quick-draw" class="action-btn primary" title="Instant Iaido Quick Draw / Sheathe">
+                        ⚡ Quick Draw (居合)
+                    </button>
+                    <button id="btn-explode" class="action-btn" title="Inspect Nakago tang, habaki, and internal construction">
+                        🔍 Disassemble (解体)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tameshigiri Dojo Mode Overlay -->
+        <div id="dojo-ui">
+            <!-- Top Right Score HUD -->
+            <div class="dojo-hud glass-panel interactive">
+                <div class="dojo-hud-title">
+                    <span>TAMESHIGIRI (試し斬り)</span>
+                    <span style="font-size: 11px; color: #e5b958;">TARGET PRACTICE</span>
+                </div>
+                <div class="dojo-stat-row">
+                    <span>Score (得点):</span>
+                    <span id="dojo-score" class="dojo-stat-val">0</span>
+                </div>
+                <div class="dojo-stat-row">
+                    <span>Combo (連撃):</span>
+                    <span id="dojo-combo" class="dojo-stat-val" style="color: #ffdf78;">x0</span>
+                </div>
+
+                <div class="target-select-row">
+                    <button class="target-btn" onclick="window.app.dojo.spawnTarget('tatami')">Rolled Tatami (畳)</button>
+                    <button class="target-btn" onclick="window.app.dojo.spawnTarget('bamboo')">Green Bamboo (竹)</button>
+                </div>
+            </div>
+
+            <!-- Slice Evaluation Pop-in Banner -->
+            <div id="slice-banner" class="slice-banner hidden">
+                <div class="slice-grade">KANPEKI!</div>
+                <div class="slice-sub">Flawless Kesa-Giri (完璧)</div>
+                <div class="slice-details">Angle: 42° | Speed: 1250 px/s</div>
+            </div>
+
+            <div class="slash-instructions">
+                SWIPE OR DRAG MOUSE ACROSS THE TARGET TO SLICE • TEST BLADE CUTTING ANGLES
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Files -->
+    <script src="audio.js"></script>
+    <script src="swords.js"></script>
+    <script src="environment.js"></script>
+    <script src="tameshigiri.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
